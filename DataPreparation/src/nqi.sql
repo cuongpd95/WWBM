@@ -1,0 +1,1 @@
+﻿select count(*) from (select distinct id from tfidf where LOWER(term) = N'chiến_tranh') as dt

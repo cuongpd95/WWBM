@@ -1,0 +1,1 @@
+﻿select term_count from tfidf where term = N'Lịch_sử' and id = 1

@@ -1,0 +1,1 @@
+select sum(term_count) from tfidf where id = 1

@@ -19,7 +19,7 @@ public class TestVnCoreNLP {
         String[] annotators = {"wseg", "pos", "ner"}; 
         VnCoreNLP pipeline = new VnCoreNLP(annotators); 
     
-        String str = "Trần Hưng Đạo (1882 - 2222) sinh ra ở Việt Nam"; 
+        String str = "Khi đến nơi, Thủ Độ vặn hỏi trước mặt, người quân hiệu ấy cứ theo sự thực trả lời"; 
         Annotation annotation = new Annotation(str); 
         pipeline.annotate(annotation); 
         

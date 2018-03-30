@@ -28,9 +28,9 @@ public class DataCleaner {
 			if (!word.getPosTag().equalsIgnoreCase("ch")) {
 				if (!StringUtils.isPunctuation(word.getForm())
 						& !StringUtils.isBrace(word.getForm())) {
-//					if (!isStopWord(word.getForm())) {
-//						result.add(word);
-//					}
+					if (!isStopWord(word.getForm())) {
+						result.add(word);
+					}
 					result.add(word);
 				}
 			}

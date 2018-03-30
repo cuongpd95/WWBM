@@ -61,17 +61,19 @@ public class FasterDBHelper {
 	 * Connect database with CONNECTION_URL.
 	 * 
 	 * @return boolean
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public boolean connect() {
+	public boolean connect() throws InstantiationException, IllegalAccessException {
 		try {
 			// check connect is null or close
 			if (null == con || con.isClosed()) {
 				// register the driver class with DriverManager
-				Class.forName(prop.getProperty("drivername"));
+				Class.forName(prop.getProperty("drivername")).newInstance();
+				
 				// open connect
-				con = DriverManager.getConnection(prop
-						.getProperty("connectionString")
-				// ,prop.getProperty("uid"), prop.getProperty("pwd")
+				con = DriverManager.getConnection(prop.getProperty("connectionString")
+						, prop.getProperty("uid"),prop.getProperty("pwd")
 						);
 			}
 			return true;
@@ -131,8 +133,7 @@ public class FasterDBHelper {
 	 * @param wordList
 	 * @throws SQLException
 	 */
-	public void insertDFTable(int docId, List<MyWord> wordList)
-			throws SQLException {
+	public void insertDFTable(int docId, List<MyWord> wordList) throws SQLException {
 		// STEP 4: Execute a query
 		// connect();
 		statement = con.createStatement();
@@ -203,8 +204,7 @@ public class FasterDBHelper {
 			String passage = (String) iterator.next();
 			System.out.println(passage);
 			// Insert to DF table
-			prepared.setNString(1,
-					passage.trim().toLowerCase().replace(" ", "_"));
+			prepared.setNString(1, passage.trim().toLowerCase().replace(" ", "_"));
 			prepared.executeUpdate();
 		}
 
@@ -400,8 +400,9 @@ public class FasterDBHelper {
 		List<Integer> docs = new ArrayList<Integer>();
 		String sql;
 		// sql =
-		// "SELECT distinct id FROM tfidf_ner where CHECKSUM(?) = cs_lower_term AND LowerTerm = ?";
-//		sql = "SELECT distinct id FROM tfidf where term_id = ?";
+		// "SELECT distinct id FROM tfidf_ner where CHECKSUM(?) = cs_lower_term AND
+		// LowerTerm = ?";
+		// sql = "SELECT distinct id FROM tfidf where term_id = ?";
 		sql = "SELECT distinct docid FROM passage_vectorilize where term_id = ?";
 
 		prepared = con.prepareStatement(sql);
@@ -484,7 +485,7 @@ public class FasterDBHelper {
 
 		// connect();
 
-		String sql = "select sum(term_count) as datasetLength from tfidf_hashtb";
+		String sql = "select sum(term_count) as datasetLength from passage_vectorilize";
 
 		prepared = con.prepareStatement(sql);
 
@@ -534,21 +535,22 @@ public class FasterDBHelper {
 	 * @param docId
 	 * @return
 	 * @throws SQLException
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public Passage getPassage(int docId) throws SQLException {
+	public Passage getPassage(int docId) throws SQLException, InstantiationException, IllegalAccessException {
 
 		connect();
 
 		Passage passage = null;
-		String sql = "SELECT id, title, [text] FROM passages where id = ?";
+		String sql = "SELECT id, title, `text` FROM passages where id = ?";
 		prepared = con.prepareStatement(sql);
 		prepared.setInt(1, docId);
 
 		ResultSet rs = prepared.executeQuery();
 
 		while (rs.next()) {
-			passage = new Passage(rs.getInt("id"), rs.getNString("title"),
-					rs.getNString("text"));
+			passage = new Passage(rs.getInt("id"), rs.getNString("title"), rs.getNString("text"));
 		}
 
 		rs.close();
@@ -561,7 +563,7 @@ public class FasterDBHelper {
 	/**
 	 * @param tokens
 	 * @return
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public List<Integer> getTermId(List<Word> tokens) throws SQLException {
 		List<Integer> termIds = new ArrayList<Integer>();
@@ -575,23 +577,21 @@ public class FasterDBHelper {
 	/**
 	 * @param form
 	 * @return
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private int getTermId(String term) throws SQLException {
-		String sql = "select id from ndictionary where cs_term = checksum(?) and tterm = ?";
+		String sql = "select id from ndictionary where CONVERT(tterm, BINARY) = CONVERT(?, BINARY)";
 		prepared = con.prepareStatement(sql);
 		prepared.setNString(1, term.toLowerCase());
-		prepared.setNString(2, term.toLowerCase());
-		
+
 		ResultSet rs = prepared.executeQuery();
 		int id = -1;
 		while (rs.next()) {
 			id = rs.getInt("id");
 		}
-		
 		rs.close();
 		prepared.close();
-		
+
 		return id;
 	}
 

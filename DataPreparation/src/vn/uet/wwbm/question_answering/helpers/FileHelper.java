@@ -75,7 +75,7 @@ public class FileHelper {
 			throws IOException {
 		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < choices.size(); i++) {
-			data.append(decodeChoice(choices.get(i).intValue()) + "," + questions.get(i).getRightAnswer() + "\n");
+			data.append(decodeChoice(choices.get(i).intValue()) + "," + decodeChoice(questions.get(i).getRightAnswer()) + "\n");
 		}
 
 		File file = new File(filePath);

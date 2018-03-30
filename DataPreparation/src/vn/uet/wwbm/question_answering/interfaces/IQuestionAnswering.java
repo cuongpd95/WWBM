@@ -22,7 +22,9 @@ public interface IQuestionAnswering {
 	 * @return document id
 	 * @throws SQLException 
 	 * @throws IOException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public List<BM25Score> getBestRelevantDoc(String query, String a, String b, String c, String d) throws IOException, SQLException;
+	public List<BM25Score> getBestRelevantDoc(String query, String a, String b, String c, String d) throws IOException, SQLException, InstantiationException, IllegalAccessException;
 
 }

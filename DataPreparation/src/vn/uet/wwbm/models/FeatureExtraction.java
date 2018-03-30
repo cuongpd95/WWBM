@@ -17,7 +17,7 @@ import vn.uet.wwbm.question_answering.helpers.FileHelper;
  */
 public class FeatureExtraction {
 
-	public static void main(String[] args) throws IOException, SQLException {
+	public static void main(String[] args) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		List<Question> questions = FileHelper.readData("src/data_test2.txt");
 
 		FilterPipeline filterPipeline = new FilterPipeline();

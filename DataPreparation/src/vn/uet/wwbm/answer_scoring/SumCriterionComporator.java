@@ -18,10 +18,10 @@ public class SumCriterionComporator implements Comparator<AnswerScoreCriterion>{
 	 */
 	@Override
 	public int compare(AnswerScoreCriterion o1, AnswerScoreCriterion o2) {
-		if (o1.getEs() + o1.getLcs()  + o1.getOv() > o2.getEs() + o2.getLcs()  + o2.getOv()) {
+		if (o1.getEs()  + o1.getOv() > o2.getEs()  + o2.getOv()) {
 			return 1;
 		}
-		else if (o1.getEs() + o1.getLcs() + o1.getOv() < o2.getEs() + o2.getLcs() + o2.getOv()) {
+		else if (o1.getEs()+ o1.getOv() < o2.getEs() + o2.getOv()) {
 			return -1;
 		}
 		else {

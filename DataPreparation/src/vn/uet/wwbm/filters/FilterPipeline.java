@@ -13,7 +13,9 @@ import vn.uet.wwbm.models.CreterionLogisticRegression;
 import vn.uet.wwbm.models.PassageFeature;
 import vn.uet.wwbm.question_answering.BM25Score;
 import vn.uet.wwbm.question_answering.QuestionAnswering;
+import vn.uet.wwbm.question_answering.comparators.CriteriaPassageComporator;
 import vn.uet.wwbm.question_answering.comparators.ProbabilityPassageComporator;
+import vn.uet.wwbm.question_answering.comparators.SumCriteria;
 import vn.uet.wwbm.question_answering.db.FasterDBHelper;
 import vn.uet.wwbm.question_answering.entities.Passage;
 import vn.uet.wwbm.question_answering.interfaces.IQuestionAnswering;
@@ -27,35 +29,30 @@ import weka.core.Instances;
  */
 public class FilterPipeline {
 
-	private IQuestionAnswering questionAnswering;
+	private QuestionAnswering questionAnswering;
 
 	private FasterDBHelper fasterDBHelper;
 
 	private StringSimilarity stringSimilarity;
 
-	public FilterPipeline() throws IOException, SQLException {
+	public FilterPipeline() throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		questionAnswering = new QuestionAnswering();
 		fasterDBHelper = FasterDBHelper.getInstance();
 		stringSimilarity = StringSimilarity.getInstance();
 	}
-
-	public List<Passage> filterPassages(String question, String cA, String cB,
-			String cC, String cD) throws Exception {
+	
+	public List<Passage> filterPassagesHardCode(String question, String cA, String cB, String cC, String cD) throws IOException, SQLException, InstantiationException, IllegalAccessException{
 		List<Passage> passages = new ArrayList<Passage>();
 		List<BM25Score> psgs = questionAnswering.getBestRelevantDoc(question,
 				cA, cB, cC, cD);
 		//
 		if (psgs != null) {
 			if (!psgs.isEmpty()) {
-				Logistic logistic = (Logistic) CreterionLogisticRegression.loadModel();
-				Instances dataSet = CreterionLogisticRegression.loadDataSet();
 				
 				BM25Score psg;
 				double es;
 				double ov;
 				Passage passage;
-				Instance instance = new Instance(3);
-				instance.setDataset(dataSet);
 				for (int i = 0; i < psgs.size(); i++) {
 					psg = psgs.get(i);
 					passage = fasterDBHelper.getPassage(psg.getDocId());
@@ -66,17 +63,85 @@ public class FilterPipeline {
 							passage.getPassage());
 					ov = stringSimilarity.calculateOverlap(question,
 							passage.getPassage());
-					instance.setValue(0, passage.getBm25Score());
-					instance.setValue(1, es);
-					instance.setValue(2, ov);
-					
-					passage.setUsefulProbability(logistic.distributionForInstance(instance)[1]);
+					passage.setEs(es);
+					passage.setOv(ov);
 					passages.add(passage);
 				}
 			}
 		}
-		passages.sort(new ProbabilityPassageComporator());
+		passages.sort(new CriteriaPassageComporator());
 		Collections.reverse(passages);
+		if (passages.size() >= 1) {
+			return passages.subList(0, 1);
+		}
+		else {
+			return passages;
+		}	
+	}
+
+	public List<Passage> filterPassages(String question, String cA, String cB,
+			String cC, String cD) throws Exception {
+		List<Passage> passages = new ArrayList<Passage>();
+		List<BM25Score> psgs = questionAnswering.getBestRelevantDoc(question,
+				cA, cB, cC, cD);
+		//
+		if (psgs != null) {
+			if (!psgs.isEmpty()) {
+//				Logistic logistic = (Logistic) CreterionLogisticRegression.loadModel();
+//				Instances dataSet = CreterionLogisticRegression.loadDataSet();
+				
+				BM25Score psg;
+				double es;
+				double ov;
+				Passage passage;
+//				Instance instance = new Instance(3);
+//				instance.setDataset(dataSet);
+				
+				double totalBM25 = 0;
+				double totalES = 0;
+				double totalOV = 0;
+				for (int i = 0; i < psgs.size(); i++) {
+					psg = psgs.get(i);
+					passage = fasterDBHelper.getPassage(psg.getDocId());
+					passage.setBm25Score(psg.getScore());
+
+					// Calculate filter scores
+					es = stringSimilarity.calculateExactSubsequence(question,
+							passage.getPassage());
+					ov = stringSimilarity.calculateOverlap(question,
+							passage.getPassage());
+					passage.setEs(es);
+					passage.setOv(ov);
+//					instance.setValue(0, passage.getBm25Score());
+//					instance.setValue(1, es);
+//					instance.setValue(2, ov);
+					
+//					passage.setUsefulProbability(logistic.distributionForInstance(instance)[1]);
+					totalBM25 += psg.getScore();
+					totalES += es;
+					totalOV += ov;
+					passages.add(passage);
+				}
+				
+				//Normalize score
+				for (int i = 0; i < passages.size(); i++) {
+					passages.get(i).normalizeScore(totalBM25, totalES, totalOV);
+				}
+			}
+		}
+//		passages.sort(new ProbabilityPassageComporator());
+		
+		passages.sort(new SumCriteria());
+		
+//		passages.sort(new );
+		
+		Collections.reverse(passages);
+		
+		System.out.println(question);
+		for (int i = 0; i < passages.size(); i++) {
+			System.out.println(passages.get(i).getBm25Score() + " - " + passages.get(i).getEs() + " - " + passages.get(i).getOv() + " - " +passages.get(i).getPassage());
+			
+		}
 		if (passages.size() >= 2) {
 			return passages.subList(0, 2);
 		}
@@ -88,7 +153,7 @@ public class FilterPipeline {
 	
 	
 	public List<PassageFeature> generateFeaturesOfPassage(String question, String cA, String cB,
-			String cC, String cD) throws IOException, SQLException {
+			String cC, String cD) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		List<PassageFeature> passages = new ArrayList<PassageFeature>();
 		List<BM25Score> psgs = questionAnswering.getBestRelevantDoc(question,
 				cA, cB, cC, cD);

@@ -45,7 +45,7 @@ public class BM25Okapi {
 
 	int totalWordInDataset;
 
-	public BM25Okapi(double b) throws IOException, SQLException {
+	public BM25Okapi(double b) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		String[] annotators = { "wseg", "pos", "ner" };
 		pipeline = new VnCoreNLP(annotators);
 		cleaner = new DataCleaner();
@@ -125,7 +125,7 @@ public class BM25Okapi {
 	// }
 
 	public List<BM25Score> searchAllTerm(String query, String a, String b, String c, String d) throws IOException,
-			SQLException {
+			SQLException, InstantiationException, IllegalAccessException {
 		if (query == null || query.isEmpty()) {
 			throw new IOException("The query can not be empty!");
 		} else {
@@ -154,16 +154,19 @@ public class BM25Okapi {
 			List<Integer> nounsId = fasterDBHelper.getTermId(nouns);
 			List<Integer> nersId = fasterDBHelper.getTermId(ners);
 
-			List<Integer> relevantDoc = fasterDBHelper.getRelevantDocs(nersId);
-			if (relevantDoc.isEmpty()) {
-				relevantDoc = fasterDBHelper.getRelevantDocs(nounsId);
-			}
+//			List<Integer> relevantDoc = fasterDBHelper.getRelevantDocs(nersId);
+//			if (relevantDoc.isEmpty()) {
+//				relevantDoc = fasterDBHelper.getRelevantDocs(nounsId);
+//			}
+			
+			List<Integer> relevantDoc = fasterDBHelper.getRelevantDocs(nounsId);
 
 			// Calculate bm25 score for each document
 			System.out.println("****************BM25 Scoring***********"
 					+ relevantDoc.size());
 			int docLength;
 			if (!relevantDoc.isEmpty()) {
+				
 				int length = relevantDoc.size();
 				for (int i = 0; i < length; i++) {
 					int termFrequencyInQuery;

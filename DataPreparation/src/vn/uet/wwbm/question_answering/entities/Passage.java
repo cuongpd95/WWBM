@@ -18,6 +18,10 @@ public class Passage {
 	private double bm25Score;
 	
 	private double usefulProbability;
+	
+	private double es;
+	
+	private double ov;
 
 	public Passage(int id, String title, String passage) {
 		super();
@@ -76,5 +80,28 @@ public class Passage {
 	 */
 	public double getUsefulProbability() {
 		return usefulProbability;
+	}
+	
+	public void setEs(double es) {
+		this.es = es;
+	}
+
+	public void setOv(double ov) {
+		this.ov = ov;
+	}
+	
+	public double getOv() {
+		return ov;
+	}
+	
+	public double getEs() {
+		return es;
+	}
+
+	public void normalizeScore(double totalBM25, double totalES, double totalOV) {
+		bm25Score = bm25Score/totalBM25;
+		es = es/ totalES;
+		ov = ov/totalOV;
+		
 	}
 }

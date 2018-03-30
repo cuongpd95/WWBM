@@ -19,8 +19,10 @@ public class BM25Test {
 
 	/**
 	 * @param args
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException {
 		try {
 			String query = "Ai là người đã lãnh đạo cuộc chiến với quân Nam Hán trên sông Bạch Đằng?";
 			BM25Okapi bm25Okapi = new BM25Okapi(0.75d);

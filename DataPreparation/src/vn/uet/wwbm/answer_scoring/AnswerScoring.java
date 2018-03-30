@@ -24,7 +24,7 @@ public class AnswerScoring implements IAnswerScoring {
 
 	private StringSimilarity similarity;
 
-	public AnswerScoring() throws IOException, SQLException {
+	public AnswerScoring() throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		filterPipeline = new FilterPipeline();
 		similarity = StringSimilarity.getInstance();
 	}
@@ -32,8 +32,7 @@ public class AnswerScoring implements IAnswerScoring {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * vn.uet.wwbm.answer_scoring.interfaces.IAnswerScoring#scoring(java.lang
+	 * @see vn.uet.wwbm.answer_scoring.interfaces.IAnswerScoring#scoring(java.lang
 	 * .String, java.lang.String, java.lang.String, java.lang.String,
 	 * java.lang.String)
 	 */
@@ -97,7 +96,7 @@ public class AnswerScoring implements IAnswerScoring {
 	 * @param b
 	 * @param a
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	// private List<AnswerScore> calculateScore(BM25Score bm25Score, String a,
 	// String b, String c, String d) throws SQLException {
@@ -160,20 +159,16 @@ public class AnswerScoring implements IAnswerScoring {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * vn.uet.wwbm.answer_scoring.interfaces.IAnswerScoring#scoring(java.lang
+	 * @see vn.uet.wwbm.answer_scoring.interfaces.IAnswerScoring#scoring(java.lang
 	 * .String, java.lang.String, java.lang.String, java.lang.String,
 	 * java.lang.String)
 	 */
 	@Override
-	public List<AnswerScoreCriterion> scoring(String question, String A,
-			String B, String C, String D) throws Exception {
+	public List<AnswerScoreCriterion> scoring(String question, String A, String B, String C, String D)
+			throws Exception {
 		List<AnswerScoreCriterion> answers = new ArrayList<AnswerScoreCriterion>();
 
-		List<Passage> passages = filterPipeline.filterPassages(question, A, B,
-				C, D);
-		
-		System.out.println(passages.size());
+		List<Passage> passages = filterPipeline.filterPassages(question, A, B, C, D);
 
 		if (passages != null) {
 			if (!passages.isEmpty()) {
@@ -205,47 +200,41 @@ public class AnswerScoring implements IAnswerScoring {
 					ov = new double[4];
 
 					passage = passages.get(i);
-					psgScore = (passage.getUsefulProbability()) / totalScore;
+//					psgScore = (passage.getUsefulProbability()) / totalScore;
+					psgScore = passage.getBm25Score() + passage.getEs() + passage.getOv();
 
-					p1 = similarity.calculateExactSubsequence(A,
-							passage.getPassage());
-					p2 = similarity.calculateExactSubsequence(B,
-							passage.getPassage());
-					p3 = similarity.calculateExactSubsequence(C,
-							passage.getPassage());
-					p4 = similarity.calculateExactSubsequence(D,
-							passage.getPassage());
-					es = getCriterionScore(p1 * psgScore, p2 * psgScore, p3
-							* psgScore, p4 * psgScore);
+					p1 = similarity.calculateExactSubsequence(A, passage.getPassage());
+					p2 = similarity.calculateExactSubsequence(B, passage.getPassage());
+					p3 = similarity.calculateExactSubsequence(C, passage.getPassage());
+					p4 = similarity.calculateExactSubsequence(D, passage.getPassage());
+					es = getCriterionScore(p1 * psgScore, p2 * psgScore, p3 * psgScore, p4 * psgScore);
 
-//					p1 = similarity.calculateLevenshteinSimilarity(A,
-//							passage.getTitle());
-//					p2 = similarity.calculateLevenshteinSimilarity(B,
-//							passage.getTitle());
-//					p3 = similarity.calculateLevenshteinSimilarity(C,
-//							passage.getTitle());
-//					p4 = similarity.calculateLevenshteinSimilarity(D,
-//							passage.getTitle());
-//					ls = getCriterionScore(p1 * psgScore, p2 * psgScore, p3
-//							* psgScore, p4 * psgScore);
+					// p1 = similarity.calculateLevenshteinSimilarity(A,
+					// passage.getTitle());
+					// p2 = similarity.calculateLevenshteinSimilarity(B,
+					// passage.getTitle());
+					// p3 = similarity.calculateLevenshteinSimilarity(C,
+					// passage.getTitle());
+					// p4 = similarity.calculateLevenshteinSimilarity(D,
+					// passage.getTitle());
+					// ls = getCriterionScore(p1 * psgScore, p2 * psgScore, p3
+					// * psgScore, p4 * psgScore);
 
 					p1 = similarity.calculateOverlap(A, passage.getPassage());
 					p2 = similarity.calculateOverlap(B, passage.getPassage());
 					p3 = similarity.calculateOverlap(C, passage.getPassage());
 					p4 = similarity.calculateOverlap(D, passage.getPassage());
-					ov = getCriterionScore(p1 * psgScore, p2 * psgScore, p3
-							* psgScore, p4 * psgScore);
+					ov = getCriterionScore(p1 * psgScore, p2 * psgScore, p3 * psgScore, p4 * psgScore);
 
 					p1 = similarity.calculateLCS(A, passage.getPassage());
 					p2 = similarity.calculateLCS(B, passage.getPassage());
 					p3 = similarity.calculateLCS(C, passage.getPassage());
 					p4 = similarity.calculateLCS(D, passage.getPassage());
-					lcs = getCriterionScore(p1 * psgScore, p2 * psgScore, p3
-							* psgScore, p4 * psgScore);
+					lcs = getCriterionScore(p1 * psgScore, p2 * psgScore, p3 * psgScore, p4 * psgScore);
 
 					pas.setEs(es);
 					pas.setLcs(lcs);
-//					pas.setLs(ls);
+					// pas.setLs(ls);
 					pas.setOv(ov);
 
 					rankedScore.add(pas);
@@ -260,13 +249,12 @@ public class AnswerScoring implements IAnswerScoring {
 					for (int j = 0; j < rankedScore.size(); j++) {
 						pasi = rankedScore.get(j);
 						esSum += pasi.getEs()[i];
-//						lsSum += pasi.getLs()[i];
+						// lsSum += pasi.getLs()[i];
 						lcsSum += pasi.getLcs()[i];
 						ovSum += pasi.getOv()[i];
 					}
-					System.out.println(i + 1 + " - " + esSum + " - " + lsSum + " - "+ lcsSum + " - " + ovSum);
-					AnswerScoreCriterion asci = new AnswerScoreCriterion(i + 1,
-							esSum, lsSum, lcsSum, ovSum);
+					System.out.println(i + 1 + " - " + esSum + " - " + lsSum + " - " + lcsSum + " - " + ovSum);
+					AnswerScoreCriterion asci = new AnswerScoreCriterion(i + 1, esSum, lsSum, lcsSum, ovSum);
 					answers.add(asci);
 				}
 			}
@@ -300,8 +288,7 @@ public class AnswerScoring implements IAnswerScoring {
 	 * @param p4
 	 * @return
 	 */
-	private double[] getCriterionScore(double p1, double p2, double p3,
-			double p4) {
+	private double[] getCriterionScore(double p1, double p2, double p3, double p4) {
 		double[] result = new double[4];
 		if (p1 + p2 + p3 + p4 == 0) {
 			for (int i = 0; i < 4; i++) {
@@ -314,6 +301,82 @@ public class AnswerScoring implements IAnswerScoring {
 			result[3] = p4 / (p1 + p2 + p3 + p4);
 		}
 		return result;
+	}
+
+	public List<AnswerScoreCriterion> scoringEdit(String question, String A, String B, String C, String D)
+			throws Exception {
+		List<AnswerScoreCriterion> answers = new ArrayList<AnswerScoreCriterion>();
+
+		List<Passage> passages = filterPipeline.filterPassagesHardCode(question, A, B, C, D);
+
+		if (passages != null) {
+			if (!passages.isEmpty()) {
+				double p1;
+				double p2;
+				double p3;
+				double p4;
+
+				double[] es;
+				double[] lcs;
+				double[] ls;
+				double[] ov;
+
+				Passage passage;
+
+				double totalScore = getTotalScore(passages);
+
+				double psgScore;
+
+				PassageAnswerScore pas;
+
+				List<PassageAnswerScore> rankedScore = new ArrayList<PassageAnswerScore>();
+
+				pas = new PassageAnswerScore();
+				es = new double[4];
+				lcs = new double[4];
+				ls = new double[4];
+				ov = new double[4];
+
+				passage = passages.get(0);
+				psgScore = (passage.getUsefulProbability()) / totalScore;
+
+				p1 = similarity.calculateExactSubsequence(A, passage.getPassage());
+				p2 = similarity.calculateExactSubsequence(B, passage.getPassage());
+				p3 = similarity.calculateExactSubsequence(C, passage.getPassage());
+				p4 = similarity.calculateExactSubsequence(D, passage.getPassage());
+				es = getCriterionScore(p1, p2, p3, p4);
+
+				p1 = similarity.calculateLevenshteinSimilarity(A, passage.getTitle());
+				p2 = similarity.calculateLevenshteinSimilarity(B, passage.getTitle());
+				p3 = similarity.calculateLevenshteinSimilarity(C, passage.getTitle());
+				p4 = similarity.calculateLevenshteinSimilarity(D, passage.getTitle());
+				ls = getCriterionScore(p1, p2, p3, p4);
+
+				p1 = similarity.calculateOverlap(A, passage.getPassage());
+				p2 = similarity.calculateOverlap(B, passage.getPassage());
+				p3 = similarity.calculateOverlap(C, passage.getPassage());
+				p4 = similarity.calculateOverlap(D, passage.getPassage());
+				ov = getCriterionScore(p1, p2, p3, p4);
+
+				p1 = similarity.calculateLCS(A, passage.getPassage());
+				p2 = similarity.calculateLCS(B, passage.getPassage());
+				p3 = similarity.calculateLCS(C, passage.getPassage());
+				p4 = similarity.calculateLCS(D, passage.getPassage());
+				lcs = getCriterionScore(p1, p2, p3, p4);
+
+				pas.setEs(es);
+				pas.setLcs(lcs);
+				pas.setLs(ls);
+				pas.setOv(ov);
+				
+				for(int j = 0; j < 4; j++) {
+					AnswerScoreCriterion asci = new AnswerScoreCriterion(j + 1, pas.getEs()[j], pas.getLs()[j], pas.getLcs()[j], pas.getOv()[j]);
+					answers.add(asci);
+				}
+			}
+		}
+
+		return answers;
 	}
 
 }

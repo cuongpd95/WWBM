@@ -23,7 +23,7 @@ public class QuestionAnswering implements IQuestionAnswering {
 	public static final int NUMBER_OF_PASSAGES = 30;
 	private BM25Okapi searcher;
 
-	public QuestionAnswering() throws IOException, SQLException {
+	public QuestionAnswering() throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		searcher = new BM25Okapi(0.75d);
 	}
 
@@ -35,7 +35,7 @@ public class QuestionAnswering implements IQuestionAnswering {
 	 */
 	@Override
 	public List<BM25Score> getBestRelevantDoc(String query, String a, String b,
-			String c, String d) throws IOException, SQLException {
+			String c, String d) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		List<BM25Score> docs = searcher.searchAllTerm(query, a, b, c, d);
 
 		if (docs.size() >= NUMBER_OF_PASSAGES) {
@@ -54,7 +54,7 @@ public class QuestionAnswering implements IQuestionAnswering {
 		}
 	}
 
-	public static void main(String[] args) throws IOException, SQLException {
+	public static void main(String[] args) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		FasterDBHelper fasterDBHelper = FasterDBHelper.getInstance();
 		List<Question> questions = FileHelper.readData("src/data_test2.txt");
 		IQuestionAnswering qa = new QuestionAnswering();

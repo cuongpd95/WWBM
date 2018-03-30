@@ -42,16 +42,14 @@ public class StringSimilarity {
 
 	public double calculateLevenshteinSimilarity(String candidateAnswer,
 			String title) {
-		System.out.println(" x"
-				+ normalizedLevenshtein.distance(candidateAnswer, title));
 		Levenshtein levenshtein = new Levenshtein();
-		System.out.println("y" + levenshtein.distance(candidateAnswer, title));
+		System.out.println("y" + levenshtein.distance(candidateAnswer.toLowerCase(), title.toLowerCase()));
 		return normalizedLevenshtein.similarity(candidateAnswer, title);
 	}
 
 	public double calculateExactSubsequence(String candidateAnswer,
 			String passage) {
-		int distance = lcs.length(candidateAnswer, passage);
+		int distance = lcs.length(candidateAnswer.toLowerCase(), passage.toLowerCase());
 		return ((double) distance) / candidateAnswer.length();
 	}
 
@@ -95,11 +93,11 @@ public class StringSimilarity {
 	}
 
 	public int calculateLCS(String candidateAnswer, String passage) {
-		return lcs.length(candidateAnswer, passage);
+		return lcs.length(candidateAnswer.toLowerCase(), passage.toLowerCase());
 	}
 
 	public double calculateNGram(String question, String passage) {
-		return 1 - ngram.distance(question, passage);
+		return 1 - ngram.distance(question.toLowerCase(), passage.toLowerCase());
 	}
 
 	public static void main(String[] args) {

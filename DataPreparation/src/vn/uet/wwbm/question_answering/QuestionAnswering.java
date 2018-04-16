@@ -42,13 +42,6 @@ public class QuestionAnswering implements IQuestionAnswering {
 			docs.sort(new BM25ScoreComparator());
 			Collections.reverse(docs);
 			return docs.subList(0, NUMBER_OF_PASSAGES);
-			// int[] ids = new int[2];
-			// // Sort score;
-
-			// for (int i = 0; i < 2; i++) {
-			// ids[i] = docs.get(i).getDocId();
-			// }
-			// return ids;
 		} else {
 			return docs;
 		}

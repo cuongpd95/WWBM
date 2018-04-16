@@ -18,6 +18,8 @@ public class AnswerScoreCriterion {
 	private double lcs;
 	
 	private double ov;
+	
+	private double confidence;
 
 	public AnswerScoreCriterion(int candidateCode, double es, double ls, double lcs, double ov) {
 		super();
@@ -72,5 +74,13 @@ public class AnswerScoreCriterion {
 	 */
 	public int getCandidateCode() {
 		return candidateCode;
+	}
+	
+	public void setConfidence(double confidence) {
+		this.confidence = confidence;
+	}
+	
+	public double getConfidence() {
+		return confidence;
 	}
 }

@@ -166,9 +166,11 @@ public class BM25Okapi {
 					+ relevantDoc.size());
 			int docLength;
 			if (!relevantDoc.isEmpty()) {
-				
 				int length = relevantDoc.size();
 				for (int i = 0; i < length; i++) {
+					if (i % 10000 == 0) {
+						System.out.println(i);
+					}
 					int termFrequencyInQuery;
 					// docLength =
 					// fasterDBHelper.getDocLength(relevantDoc.get(i));

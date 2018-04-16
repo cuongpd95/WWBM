@@ -9,25 +9,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import vn.uet.wwbm.models.CreterionLogisticRegression;
 import vn.uet.wwbm.models.PassageFeature;
 import vn.uet.wwbm.question_answering.BM25Score;
 import vn.uet.wwbm.question_answering.QuestionAnswering;
 import vn.uet.wwbm.question_answering.comparators.CriteriaPassageComporator;
-import vn.uet.wwbm.question_answering.comparators.ProbabilityPassageComporator;
 import vn.uet.wwbm.question_answering.comparators.SumCriteria;
 import vn.uet.wwbm.question_answering.db.FasterDBHelper;
 import vn.uet.wwbm.question_answering.entities.Passage;
-import vn.uet.wwbm.question_answering.interfaces.IQuestionAnswering;
-import weka.classifiers.functions.Logistic;
-import weka.core.Instance;
-import weka.core.Instances;
 
 /**
  * @author "PhanDoanCuong"
  *
  */
 public class FilterPipeline {
+	public static final int NUMBER_OF_FILTER_PSGS = 2;
 
 	private QuestionAnswering questionAnswering;
 
@@ -48,7 +43,7 @@ public class FilterPipeline {
 		//
 		if (psgs != null) {
 			if (!psgs.isEmpty()) {
-				
+				System.out.println("Rerank passages");
 				BM25Score psg;
 				double es;
 				double ov;
@@ -71,8 +66,8 @@ public class FilterPipeline {
 		}
 		passages.sort(new CriteriaPassageComporator());
 		Collections.reverse(passages);
-		if (passages.size() >= 1) {
-			return passages.subList(0, 1);
+		if (passages.size() >= NUMBER_OF_FILTER_PSGS) {
+			return passages.subList(0, NUMBER_OF_FILTER_PSGS);
 		}
 		else {
 			return passages;

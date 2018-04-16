@@ -329,8 +329,6 @@ public class AnswerScoring implements IAnswerScoring {
 
 				PassageAnswerScore pas;
 
-				List<PassageAnswerScore> rankedScore = new ArrayList<PassageAnswerScore>();
-
 				pas = new PassageAnswerScore();
 				es = new double[4];
 				lcs = new double[4];

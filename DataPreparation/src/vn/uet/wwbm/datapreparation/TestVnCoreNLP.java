@@ -16,11 +16,19 @@ public class TestVnCoreNLP {
 	public static void main(String[] args) throws IOException {
         
         // "wseg", "pos", "ner", and "parse" refer to as word segmentation, POS tagging, NER and dependency parsing, respectively. 
-        String[] annotators = {"wseg", "pos", "ner"}; 
+        String[] annotators = {"wseg", "pos", "ner", "parse"}; 
         VnCoreNLP pipeline = new VnCoreNLP(annotators); 
     
-        String str = "Khi đến nơi, Thủ Độ vặn hỏi trước mặt, người quân hiệu ấy cứ theo sự thực trả lời"; 
-        Annotation annotation = new Annotation(str); 
+        String str ="Khởi nghĩa của hai Bà Trưng đánh bại quân xâm lược nào?"; 
+        String str1 = "Sau khi lên làm vua, Lý Bí đặt quốc hiệu nước ta là gì?";
+        String str2 = "Ai là người đã lãnh đạo cuộc khởi nghĩa đánh đuổi quân xâm lược nhà Đường năm 722?";
+        String str3 = "Thành phố nào được mệnh danh là 'Thủ đô ngàn gió'";
+        String str4 = "1867 ÷ 1874 Pháp tiếp tục xâm lấn ba tỉnh miền Tây Nam kỳ và tiến tới chiếm đóng toàn bộ Nam kỳ";
+        String str5 = "Bắc thuộc	Bắc thuộc lần thứ ba (602 - 905): nhà Tùy, nhà Đường. Trong giai đoạn Tự chủ từ 905-938 có một thời gian Việt Nam rơi vào tay Nam Hán.";
+        String str6 = "Lý Nam Đế (chữ Hán: 李南帝; 503–548), húy là Lý Bí hoặc Lý Bôn (李賁) (xem mục Tên gọi bên dưới), là vị vua đầu tiên của nhà Tiền Lý và nước Vạn Xuân.";
+        String str7 = "Cô ấy đưa cho tôi một chiếc bút.";
+        String str8 = "Vị vua đầu tiên của nhà nước Liên Xô là ai?";
+        Annotation annotation = new Annotation(str8); 
         pipeline.annotate(annotation); 
         
         System.out.println(annotation.toString());

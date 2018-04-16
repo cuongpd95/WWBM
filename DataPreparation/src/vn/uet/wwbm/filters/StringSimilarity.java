@@ -3,7 +3,6 @@
  */
 package vn.uet.wwbm.filters;
 
-import info.debatty.java.stringsimilarity.Levenshtein;
 import info.debatty.java.stringsimilarity.LongestCommonSubsequence;
 import info.debatty.java.stringsimilarity.NGram;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
@@ -42,8 +41,6 @@ public class StringSimilarity {
 
 	public double calculateLevenshteinSimilarity(String candidateAnswer,
 			String title) {
-		Levenshtein levenshtein = new Levenshtein();
-		System.out.println("y" + levenshtein.distance(candidateAnswer.toLowerCase(), title.toLowerCase()));
 		return normalizedLevenshtein.similarity(candidateAnswer, title);
 	}
 
@@ -101,16 +98,21 @@ public class StringSimilarity {
 	}
 
 	public static void main(String[] args) {
+//		StringSimilarity s = new StringSimilarity();
+//		String question = "Khu vực nào được gọi là thủ đô kháng chiến?";
+//		String passage = "Việt Bắc được gọi một cách văn hoa là Thủ đô kháng chiến, bởi đây là nơi trú đóng của đầu não Đảng Cộng sản Việt Nam thời trước khi khởi nghĩa năm 1945, và là nơi trú đóng của đầu não chính phủ Việt Minh trong thời kỳ kháng chiến chống Pháp (1945 - 1954). Nó cũng được gọi là Thủ đô gió ngàn, tên gọi này được bắt nguồn từ bài thơ Sáng tháng năm của nhà thơ Tố Hữu";
+////		String title = "Việt Bắc";
+//		System.out.println(s.calculateLCS(question, passage));
+//		System.out.println(s.calculateExactSubsequence(question, passage));
+//		// System.out.println(s.calculateLevenshteinSimilarity("Việt Bắc được",
+//		// title));
+//		// System.out.println(s.calculateNGram(question, passage));
+//		System.out.println(s.calculateOverlap(question, passage));
+		
 		StringSimilarity s = new StringSimilarity();
-		String question = "Khu vực nào được gọi là thủ đô kháng chiến?";
-		String passage = "Việt Bắc được gọi một cách văn hoa là Thủ đô kháng chiến, bởi đây là nơi trú đóng của đầu não Đảng Cộng sản Việt Nam thời trước khi khởi nghĩa năm 1945, và là nơi trú đóng của đầu não chính phủ Việt Minh trong thời kỳ kháng chiến chống Pháp (1945 - 1954). Nó cũng được gọi là Thủ đô gió ngàn, tên gọi này được bắt nguồn từ bài thơ Sáng tháng năm của nhà thơ Tố Hữu";
-//		String title = "Việt Bắc";
-		System.out.println(s.calculateLCS(question, passage));
-		System.out.println(s.calculateExactSubsequence(question, passage));
-		// System.out.println(s.calculateLevenshteinSimilarity("Việt Bắc được",
-		// title));
-		// System.out.println(s.calculateNGram(question, passage));
-		System.out.println(s.calculateOverlap(question, passage));
+		String a = "WNVVPNAN";
+		String b = "PANWVDNV";
+		System.out.println(s.calculateLCS(a, b));
 	}
 
 }

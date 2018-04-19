@@ -122,7 +122,7 @@ public class DBHelpers {
 //			String title = rs.getString("title");
 //			String passage = rs.getString("text");
 //			passages.add(new Passage(id, title, passage));
-			if (count > 150001 ) {
+			if (count > 176503 ) {
 				// Retrieve by column name
 				int id = rs.getInt("id");
 				String title = rs.getString("title");
@@ -147,12 +147,12 @@ public class DBHelpers {
 	 * @throws SQLException
 	 */
 	@SuppressWarnings("rawtypes")
-	public void insertDFTable(int docId, List<MyWord> wordList)
+	public void insertDFTable(int id, int docId, List<MyWord> wordList)
 			throws SQLException {
 		// STEP 4: Execute a query
 		connect();
 //		String sql = "INSERT INTO tfidf_ner(id, term, term_count) values(?,?,?)";
-		String sql = "INSERT INTO passage_vectorilize(docid, term, term_count) values(?,?,?)";
+		String sql = "INSERT INTO passage_vectorilize(`id`, `docid`, `term`, `term_count`) values(?,?,?,?)";
 		prepared = con.prepareStatement(sql);
 
 		@SuppressWarnings("unused")
@@ -161,9 +161,10 @@ public class DBHelpers {
 			MyWord myWord = (MyWord) iterator.next();
 			if(myWord.getTerm().length() < 100){
 				// Insert to DF table
-				prepared.setInt(1, docId);
-				prepared.setNString(2, myWord.getTerm().toLowerCase());
-				prepared.setInt(3, myWord.getCount());
+				prepared.setInt(1, id + count);
+				prepared.setInt(2, docId);
+				prepared.setNString(3, myWord.getTerm().toLowerCase());
+				prepared.setInt(4, myWord.getCount());
 				prepared.executeUpdate();
 			}
 			
@@ -510,6 +511,24 @@ public class DBHelpers {
 			prepared.setNString(3, term.getTerm().toLowerCase());
 			prepared.executeUpdate();
 		}
+
+		prepared.close();
+		disconnect();
+	}
+
+	public void insertPassages(List<Passage> psgs) throws SQLException {
+		connect();
+		String sql = "INSERT INTO passages(id, `title`, `text`)";
+		prepared = con.prepareStatement(sql);
+
+		for (Iterator iterator = psgs.iterator(); iterator.hasNext();) {
+			Passage passage = (Passage) iterator.next();
+			prepared.setInt(1, passage.getId());
+			prepared.setNString(2, passage.getTitle());
+			prepared.setNString(3, passage.getPassage());
+			prepared.executeUpdate();
+		}
+		
 
 		prepared.close();
 		disconnect();

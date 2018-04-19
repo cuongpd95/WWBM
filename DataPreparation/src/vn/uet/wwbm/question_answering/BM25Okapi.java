@@ -168,7 +168,7 @@ public class BM25Okapi {
 			if (!relevantDoc.isEmpty()) {
 				int length = relevantDoc.size();
 				for (int i = 0; i < length; i++) {
-					if (i % 10000 == 0) {
+					if (i % 10 == 0) {
 						System.out.println(i);
 					}
 					int termFrequencyInQuery;
@@ -176,7 +176,7 @@ public class BM25Okapi {
 					// fasterDBHelper.getDocLength(relevantDoc.get(i));
 					docLength = fasterDBHelper.getDocLengthAll(relevantDoc
 							.get(i));
-					// docLength = 1;
+//					 docLength = 1;
 					double score = 0;
 					int tf;
 
@@ -188,7 +188,7 @@ public class BM25Okapi {
 
 						tf = fasterDBHelper.getTermFrequencyAll(
 								relevantDoc.get(i), tokensId.get(j).intValue());
-						// tf = 1;
+//						 tf = 1;
 
 						if (tf > 0) {
 							// documentFrequency = fasterDBHelper
@@ -197,7 +197,7 @@ public class BM25Okapi {
 							documentFrequency = fasterDBHelper
 									.getDocumentFrequencyAll(tokensId.get(j)
 											.intValue());
-							// documentFrequency = 1;
+//							documentFrequency = 1;
 							termFrequencyInQuery = getTermFrequencyInQuery(
 									tokensId.get(j).intValue(), tokensId);
 							scorei = score(tf, numberOfDocumnet, docLength,

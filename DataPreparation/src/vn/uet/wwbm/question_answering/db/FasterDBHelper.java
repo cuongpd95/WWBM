@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -19,8 +20,10 @@ import java.util.TreeSet;
 import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
 
 import vn.pipeline.Word;
+import vn.uet.wwbm.datapreparation.PassVec;
 import vn.uet.wwbm.question_answering.entities.MyWord;
 import vn.uet.wwbm.question_answering.entities.Passage;
+import vn.uet.wwbm.question_answering.entities.Term;
 import vn.uet.wwbm.question_answering.helpers.PropertyLoader;
 
 /**
@@ -97,35 +100,6 @@ public class FasterDBHelper {
 		} catch (SQLException e) {
 			System.out.println(e);
 		}
-	}
-
-	/**
-	 * @return
-	 * @throws SQLException
-	 * 
-	 */
-	public List<Passage> queryPassages() throws SQLException {
-		List<Passage> passages = new ArrayList<Passage>();
-		// STEP 4: Execute a query
-		// connect();
-		statement = con.createStatement();
-		String sql;
-		sql = "SELECT id, title, [text] FROM passages";
-		ResultSet rs = statement.executeQuery(sql);
-
-		// STEP 5: Extract data from result set
-		while (rs.next()) {
-			// Retrieve by column name
-			int id = rs.getInt("id");
-			String title = rs.getString("title");
-			String passage = rs.getString("text");
-			passages.add(new Passage(id, title, passage));
-		}
-		// STEP 6: Clean-up environment
-		rs.close();
-		statement.close();
-		// con.close();
-		return passages;
 	}
 
 	/**
@@ -456,12 +430,16 @@ public class FasterDBHelper {
 	 * @throws SQLException
 	 */
 	public int getTermFrequencyAll(int docId, int termId) throws SQLException {
-		String sql = "SELECT term_count FROM passage_vectorilize WHERE docid = ? AND term_id = ?";
-		prepared = con.prepareStatement(sql);
-		prepared.setInt(2, termId);
-		prepared.setInt(1, docId);
+		String sqla = "SELECT term_count FROM passage_vectorilize WHERE docid = " + docId + " AND term_id = " + termId;
+		String sql = "SELECT term_count FROM passage_vectorilize WHERE docid = 1000 AND term_id = 1897";
+		
+//		prepared = con.prepareStatement(sql);
+//		prepared.setInt(2, termId);
+//		prepared.setInt(1, docId);
 
-		ResultSet rs = prepared.executeQuery();
+//		ResultSet rs = prepared.executeQuery();
+		statement = con.createStatement();
+		ResultSet rs = statement.executeQuery(sqla);
 
 		int count = 0;
 		while (rs.next()) {
@@ -513,11 +491,14 @@ public class FasterDBHelper {
 
 		// connect();
 
-		String sql = "SELECT docf FROM ndocFrequency where term_id = ?";
-		prepared = con.prepareStatement(sql);
-		prepared.setInt(1, termId);
-
-		ResultSet rs = prepared.executeQuery();
+//		String sql = "SELECT docf FROM ndocFrequency where term_id = ?";
+		String sqla = "SELECT docf FROM ndocFrequency where term_id = " + termId;
+//		prepared = con.prepareStatement(sql);
+//		prepared.setInt(1, termId);
+//
+//		ResultSet rs = prepared.executeQuery();
+		statement = con.createStatement();
+		ResultSet rs = statement.executeQuery(sqla);
 
 		while (rs.next()) {
 			// Retrieve by column name
@@ -564,8 +545,10 @@ public class FasterDBHelper {
 	 * @param tokens
 	 * @return
 	 * @throws SQLException
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public List<Integer> getTermId(List<Word> tokens) throws SQLException {
+	public List<Integer> getTermId(List<Word> tokens) throws SQLException, InstantiationException, IllegalAccessException {
 		List<Integer> termIds = new ArrayList<Integer>();
 		for (Iterator iterator = tokens.iterator(); iterator.hasNext();) {
 			Word token = (Word) iterator.next();
@@ -578,8 +561,10 @@ public class FasterDBHelper {
 	 * @param form
 	 * @return
 	 * @throws SQLException
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	private int getTermId(String term) throws SQLException {
+	public int getTermId(String term) throws SQLException, InstantiationException, IllegalAccessException {
 		String sql = "select id from ndictionary where CONVERT(tterm, BINARY) = CONVERT(?, BINARY)";
 		prepared = con.prepareStatement(sql);
 		prepared.setNString(1, term.toLowerCase());
@@ -591,8 +576,179 @@ public class FasterDBHelper {
 		}
 		rs.close();
 		prepared.close();
-
 		return id;
 	}
+	
+	public void insertPassages(List<Passage> psgs) throws SQLException {
+		String sql = "INSERT INTO passages(id, `title`, `text`) VALUES (?,?,?)";
+		prepared = con.prepareStatement(sql);
 
+		for (Iterator iterator = psgs.iterator(); iterator.hasNext();) {
+			Passage passage = (Passage) iterator.next();
+			System.out.println(passage.getPassage());
+			try {
+				prepared.setInt(1, passage.getId());
+				prepared.setNString(2, passage.getTitle());
+				prepared.setNString(3, passage.getPassage());
+				prepared.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+
+		prepared.close();
+	}
+	
+	public List<Passage> queryPassages() throws SQLException, InstantiationException, IllegalAccessException {
+		List<Passage> passages = new ArrayList<Passage>();
+		// STEP 4: Execute a query
+		connect();
+		statement = con.createStatement();
+		String sql;
+		sql = "SELECT `id`, `title`, `text` FROM passages";
+		ResultSet rs = statement.executeQuery(sql);
+
+		// STEP 5: Extract data from result set
+		int count = 0;
+		while (rs.next()) {
+			count++;
+//			 Retrieve by column name
+//			int id = rs.getInt("id");
+//			String title = rs.getString("title");
+//			String passage = rs.getString("text");
+//			passages.add(new Passage(id, title, passage));
+			if (count > 176503 ) {
+				// Retrieve by column name
+				int id = rs.getInt("id");
+				String title = rs.getString("title");
+				String passage = rs.getString("text");
+				passages.add(new Passage(id, title, passage));
+			}
+//			if (count > 150000) {
+//				break;
+//			}
+
+		}
+		// STEP 6: Clean-up environment
+		rs.close();
+		statement.close();
+		disconnect();
+		return passages;
+	}
+
+	public void insertDFTable(int id, int docId, List<MyWord> wordList)
+			throws SQLException, InstantiationException, IllegalAccessException {
+		// STEP 4: Execute a query
+		connect();
+//		String sql = "INSERT INTO tfidf_ner(id, term, term_count) values(?,?,?)";
+		String sql = "INSERT INTO passage_vectorilize(`id`, `docid`, `term`, `term_count`) values(?,?,?,?)";
+		prepared = con.prepareStatement(sql);
+
+		@SuppressWarnings("unused")
+		int count = 1;
+		for (Iterator iterator = wordList.iterator(); iterator.hasNext(); count++) {
+			MyWord myWord = (MyWord) iterator.next();
+			if(myWord.getTerm().length() < 100){
+				// Insert to DF table
+				prepared.setInt(1, id + count);
+				prepared.setInt(2, docId);
+				prepared.setNString(3, myWord.getTerm().toLowerCase());
+				prepared.setInt(4, myWord.getCount());
+				prepared.executeUpdate();
+			}
+			
+		}
+
+		prepared.close();
+		disconnect();
+	}
+	
+	public void updateTermId(List<Term> terms) throws SQLException, InstantiationException, IllegalAccessException {
+		connect();
+		String sql = "UPDATE passage_vectorilize set term_id = ? where cs_term = CHECKSUM(?) AND term = ?";
+		prepared = con.prepareStatement(sql);
+
+		
+		int count = 0;
+		for (Iterator iterator = terms.iterator(); iterator.hasNext();count++) {
+			System.out.println(count);
+			Term term = (Term) iterator.next();
+			// Insert to DF table
+			prepared.setInt(1, term.getId());
+			prepared.setNString(2, term.getTerm().toLowerCase());
+			prepared.setNString(3, term.getTerm().toLowerCase());
+			prepared.executeUpdate();
+		}
+
+		prepared.close();
+		disconnect();
+	}
+
+	public List<PassVec> getNullIDTermList() throws InstantiationException, IllegalAccessException, SQLException {
+		List<PassVec> pv = new ArrayList<PassVec>();
+		
+		statement = con.createStatement();
+		String sql;
+		sql = "SELECT `id`, `term` FROM passage_vectorilize where term_id = -1";
+		ResultSet rs = statement.executeQuery(sql);
+
+		// STEP 5: Extract data from result set
+		int count = 0;
+		int id = -1;
+		String term = "";
+		while (rs.next()) {
+			term = rs.getNString("term");
+			id = rs.getInt("id");
+			pv.add(new PassVec(id, term));
+		}
+		// STEP 6: Clean-up environment
+		rs.close();
+		statement.close();
+		
+		return pv;
+	}
+
+	public void updateTermId(int id, int term_id) throws SQLException, InstantiationException, IllegalAccessException {
+		String sql = "UPDATE passage_vectorilize set term_id = ? where id = ?";
+		prepared = con.prepareStatement(sql);
+
+		prepared.setInt(1, term_id);
+		prepared.setInt(2, id);
+		prepared.executeUpdate();
+		prepared.close();
+	}
+	
+	public HashMap<String, Integer> getDictionary() throws SQLException{
+		HashMap<String, Integer> dics = new HashMap<>();
+		statement = con.createStatement();
+		String sql;
+		sql = "SELECT `id`, `tterm` FROM ndictionary";
+		ResultSet rs = statement.executeQuery(sql);
+
+		// STEP 5: Extract data from result set
+		int count = 0;
+		int id = -1;
+		String term = "";
+		while (rs.next()) {
+			term = rs.getNString("tterm");
+			id = rs.getInt("id");
+			dics.put(term, id);
+		}
+		// STEP 6: Clean-up environment
+		rs.close();
+		statement.close();
+		return dics;
+	}
+
+	public void addTermToDictionary(int id, String term) throws SQLException {
+		String sql = "INSERT INTO ndictionary(id, tterm) VALUES (?,?)";
+		prepared = con.prepareStatement(sql);
+
+		prepared.setInt(1, id);
+		prepared.setNString(2, term);
+		prepared.executeUpdate();
+		prepared.close();
+	}
 }

@@ -18,8 +18,10 @@ public class GenerateTFIDFTable {
 
 	/**
 	 * @param args
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException {
 		TFIDFPreparation pre = new TFIDFPreparation();
 		try {
 			

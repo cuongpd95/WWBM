@@ -17,6 +17,7 @@ import vn.uet.wwbm.answer_scoring.containts.CandidateAnswerCode;
 import vn.uet.wwbm.main.entities.Question;
 import vn.uet.wwbm.models.PassageFeature;
 import vn.uet.wwbm.question_answering.BM25Score;
+import vn.uet.wwbm.question_answering.entities.Passage;
 
 /**
  * @author "PhanDoanCuong"
@@ -180,6 +181,37 @@ public class FileHelper {
 			data.append("\n" + passages.get(i).getTitle() + "\t" + passages.get(i).getPassage()+ "\t" + passages.get(i).getBm25score() + "\t" + passages.get(i).getEs()+ "\t" + passages.get(i).getLcs()+ "\t" + passages.get(i).getOv());
 		}
 		writeFile(filePath, data.toString());
+	}
+
+	public static List<Passage> readPassages(int startId, String path) {
+		List<Passage> psgs = new ArrayList<Passage>();
+		try {
+			String line;
+			BufferedReader bufferreader = new BufferedReader(new FileReader(
+					path));
+			line = bufferreader.readLine();
+			String[] q = new String[6];
+			int rightAns;
+			int count = 1;
+			while (line != null) {
+				q = line.split("\t");
+				System.out.println(line);
+				psgs.add(new Passage(startId + count, q[0], q[1]));
+				line = bufferreader.readLine();
+				count ++;
+			}
+		} catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		
+		return psgs;
+	}
+
+	public static void insertPassages(List<Passage> psgs) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

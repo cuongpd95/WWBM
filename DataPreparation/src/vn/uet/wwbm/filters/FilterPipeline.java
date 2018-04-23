@@ -30,20 +30,19 @@ public class FilterPipeline {
 
 	private StringSimilarity stringSimilarity;
 
-	public FilterPipeline() throws IOException, SQLException, InstantiationException, IllegalAccessException {
-		questionAnswering = new QuestionAnswering();
+	public FilterPipeline(QuestionAnswering qa) throws IOException, SQLException, InstantiationException, IllegalAccessException {
+		questionAnswering = qa;
 		fasterDBHelper = FasterDBHelper.getInstance();
 		stringSimilarity = StringSimilarity.getInstance();
 	}
 	
-	public List<Passage> filterPassagesHardCode(String question, String cA, String cB, String cC, String cD) throws IOException, SQLException, InstantiationException, IllegalAccessException{
+	public List<Passage> filterPassagesHardCode(String question, String cA, String cB, String cC, String cD, int numberOfPassages) throws IOException, SQLException, InstantiationException, IllegalAccessException{
 		List<Passage> passages = new ArrayList<Passage>();
 		List<BM25Score> psgs = questionAnswering.getBestRelevantDoc(question,
 				cA, cB, cC, cD);
 		//
 		if (psgs != null) {
 			if (!psgs.isEmpty()) {
-				System.out.println("Rerank passages");
 				BM25Score psg;
 				double es;
 				double ov;
@@ -66,8 +65,8 @@ public class FilterPipeline {
 		}
 		passages.sort(new CriteriaPassageComporator());
 		Collections.reverse(passages);
-		if (passages.size() >= NUMBER_OF_FILTER_PSGS) {
-			return passages.subList(0, NUMBER_OF_FILTER_PSGS);
+		if (passages.size() >= numberOfPassages) {
+			return passages.subList(0, numberOfPassages);
 		}
 		else {
 			return passages;
@@ -131,12 +130,6 @@ public class FilterPipeline {
 //		passages.sort(new );
 		
 		Collections.reverse(passages);
-		
-		System.out.println(question);
-		for (int i = 0; i < passages.size(); i++) {
-			System.out.println(passages.get(i).getBm25Score() + " - " + passages.get(i).getEs() + " - " + passages.get(i).getOv() + " - " +passages.get(i).getPassage());
-			
-		}
 		if (passages.size() >= 2) {
 			return passages.subList(0, 2);
 		}

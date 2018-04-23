@@ -10,11 +10,10 @@ import vn.uet.wwbm.answer_scoring.entities.AnswerScoreCriterion;
 import vn.uet.wwbm.decision_making.entities.AudienceAnswer;
 import vn.uet.wwbm.decision_making.entities.ConfidenceComparator;
 import vn.uet.wwbm.main.entities.Question;
+import vn.uet.wwbm.question_answering.QuestionAnswering;
 
 public class DecisionMarking {
 	private static final int RETIRE = -1;
-	private static final double THRESHOLD = 0.18d;
-	private static final double CONFIDENCE_THRESHOLD = 0.3d;
 	private KnowledgeHelper helper;
 	private List<Question> questions;
 
@@ -23,23 +22,20 @@ public class DecisionMarking {
 		this.questions = questions;
 	}
 
-	public int playGame() throws Exception {
+	public int playGame(QuestionAnswering qa, int numberOfPassages, float ratioThreshold, float pollAudienceThreshold) throws Exception {
 		int questionGain = 15;
-		AnswerScoring answerScoring = new AnswerScoring();
+		AnswerScoring answerScoring = new AnswerScoring(qa);
 		Question question;
 		List<AnswerScoreCriterion> answerScore;
 		int choice;
 		for (int i = 0; i < questions.size(); i++) {
 			question = questions.get(i);
 			answerScore = answerScoring.scoringEdit(question.getQuestion(), question.getCandidateA(),
-					question.getCandidateB(), question.getCandidateC(), question.getCandidateD());
+					question.getCandidateB(), question.getCandidateC(), question.getCandidateD(), numberOfPassages);
 			answerScore = updateConfidence(answerScore);
 			answerScore.sort(new ConfidenceComparator());
 			Collections.reverse(answerScore);
-			choice = makeDecision(answerScore, i);
-			System.out.println(question.getQuestion());
-			System.out.println(question.getRightAnswer() + " - " + choice);
-
+			choice = makeDecision(answerScore, i, ratioThreshold, pollAudienceThreshold);
 			if (choice != RETIRE) {
 				if (choice != questions.get(i).getRightAnswer()) {
 					if (i >= 0 && i < 5) {
@@ -62,22 +58,25 @@ public class DecisionMarking {
 		return questionGain;
 	}
 
-	private int makeDecision(List<AnswerScoreCriterion> answerScore, int indexOfQuestion) {
+	private int makeDecision(List<AnswerScoreCriterion> answerScore, int indexOfQuestion, float ratioThreshold, float pollAudienceThreshold) {
 		AnswerScoreCriterion bestAnswer = answerScore.get(0);
 		AnswerScoreCriterion secondBestAnswer = answerScore.get(1);
-		System.out.println("The confidence: " + bestAnswer.getConfidence() + " - " + secondBestAnswer.getConfidence());
+//		System.out.println("The confidence: " + bestAnswer.getConfidence() + " - " + secondBestAnswer.getConfidence());
 		if (bestAnswer.getConfidence() == 0d || bestAnswer.getConfidence()
-				- secondBestAnswer.getConfidence() < bestAnswer.getConfidence() * THRESHOLD) {
+				- secondBestAnswer.getConfidence() < bestAnswer.getConfidence() * ratioThreshold) {
 			if (helper.canUsePollTheAudience()) {
+				System.out.println((indexOfQuestion + 1) + ",Use poll the audience");
 				AudienceAnswer audienceAnswer = helper.usePollTheAudience(indexOfQuestion);
-				if (audienceAnswer.getConfidence() > CONFIDENCE_THRESHOLD) {
+				if (audienceAnswer.getConfidence() > pollAudienceThreshold) {
 					return audienceAnswer.getAnswerCode();
 				}
 			}
 			if (helper.canUseCallAFriend()) {
+				System.out.println((indexOfQuestion + 1) + ", Use call a friend " );
 				return helper.callAFriend(indexOfQuestion);
 			}
 			if (helper.canUse5050()) {
+				System.out.println((indexOfQuestion + 1) + ",Use 50:50 " );
 				int[] wrongAnswer = helper.use5050(indexOfQuestion);
 				List<AnswerScoreCriterion> anss = new ArrayList<AnswerScoreCriterion>();
 				for (int i = 0; i < answerScore.size(); i++) {
@@ -89,7 +88,7 @@ public class DecisionMarking {
 				anss.sort(new ConfidenceComparator());
 				Collections.reverse(anss);
 				if (anss.get(0).getConfidence() - anss.get(1).getConfidence() > anss.get(0).getConfidence()
-						* THRESHOLD) {
+						* ratioThreshold) {
 					return anss.get(0).getCandidateCode();
 				}
 			}

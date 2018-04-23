@@ -430,7 +430,7 @@ public class FasterDBHelper {
 	 * @throws SQLException
 	 */
 	public int getTermFrequencyAll(int docId, int termId) throws SQLException {
-		String sqla = "SELECT term_count FROM passage_vectorilize WHERE docid = " + docId + " AND term_id = " + termId;
+		String sqla = "SELECT term_count FROM passage_vectorilize WHERE term_id = " + termId + " AND  docid = " + docId;
 		String sql = "SELECT term_count FROM passage_vectorilize WHERE docid = 1000 AND term_id = 1897";
 		
 //		prepared = con.prepareStatement(sql);

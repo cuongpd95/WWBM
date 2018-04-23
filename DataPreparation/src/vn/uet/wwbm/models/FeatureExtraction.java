@@ -9,6 +9,7 @@ import java.util.List;
 
 import vn.uet.wwbm.filters.FilterPipeline;
 import vn.uet.wwbm.main.entities.Question;
+import vn.uet.wwbm.question_answering.QuestionAnswering;
 import vn.uet.wwbm.question_answering.helpers.FileHelper;
 
 /**
@@ -20,7 +21,8 @@ public class FeatureExtraction {
 	public static void main(String[] args) throws IOException, SQLException, InstantiationException, IllegalAccessException {
 		List<Question> questions = FileHelper.readData("src/data_test2.txt");
 
-		FilterPipeline filterPipeline = new FilterPipeline();
+		QuestionAnswering qa = new QuestionAnswering();
+		FilterPipeline filterPipeline = new FilterPipeline(qa);
 
 		Question question;
 		List<PassageFeature> passages;

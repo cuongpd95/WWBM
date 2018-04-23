@@ -34,7 +34,10 @@ public class FileHelper {
 			line = bufferreader.readLine();
 			while (line != null) {
 				// do whatever here
-				stopwords.add(line);
+				if (line == "") {
+					System.out.println("Null");
+				}
+				stopwords.add(line.trim());
 				line = bufferreader.readLine();
 			}
 		} catch (FileNotFoundException ex) {
@@ -75,8 +78,15 @@ public class FileHelper {
 	public static void writeAnswer(List<Integer> choices,List<Question> questions, String filePath)
 			throws IOException {
 		StringBuilder data = new StringBuilder();
+		int flag;
 		for (int i = 0; i < choices.size(); i++) {
-			data.append(decodeChoice(choices.get(i).intValue()) + "," + decodeChoice(questions.get(i).getRightAnswer()) + "\n");
+			if (choices.get(i).intValue() == questions.get(i).getRightAnswer()) {
+				flag = 1;
+			}
+			else {
+				flag = 0;
+			}
+			data.append(decodeChoice(choices.get(i).intValue()) + "," + decodeChoice(questions.get(i).getRightAnswer()) + "," + flag +"\n");
 		}
 
 		File file = new File(filePath);
@@ -132,10 +142,8 @@ public class FileHelper {
 					filePath));
 			line = bufferreader.readLine();
 			String[] q = new String[6];
-			int rightAns;
 			while (line != null) {
-				q = line.split("_");
-				System.out.println(line);
+				q = line.trim().split("_");
 				questions.add(new Question(q[0], q[1], q[2], q[3], q[4], Integer.parseInt(q[5])));
 				line = bufferreader.readLine();
 			}

@@ -45,7 +45,6 @@ public class KnowledgeHelper {
 	 * @return
 	 */
 	public AudienceAnswer usePollTheAudience(int qIndex) {
-		System.out.println("Use poll the audience");
 		pollTheAudience = false;
 		int rightAnswer = questions.get(qIndex).getRightAnswer();
 		return new AudienceAnswer(rightAnswer, 
@@ -73,7 +72,6 @@ public class KnowledgeHelper {
 	 * @return right answer
 	 */
 	public int callAFriend(int qIndex) {
-		System.out.println("Use call a friend");
 		callAFriend = false;
 		return questions.get(qIndex).getRightAnswer();
 	}
@@ -85,7 +83,6 @@ public class KnowledgeHelper {
 	 * @return
 	 */
 	public int[] use5050(int qIndex) {
-		System.out.println("Use 50:50");
 		c5050 = false;
 		int[] result = new int[2];
 		int rightAnswer = questions.get(qIndex).getRightAnswer();

@@ -12,6 +12,7 @@ import vn.uet.wwbm.answer_scoring.entities.AnswerScoreCriterion;
 import vn.uet.wwbm.answer_scoring.interfaces.IAnswerScoring;
 import vn.uet.wwbm.filters.FilterPipeline;
 import vn.uet.wwbm.filters.StringSimilarity;
+import vn.uet.wwbm.question_answering.QuestionAnswering;
 import vn.uet.wwbm.question_answering.entities.Passage;
 
 /**
@@ -24,8 +25,8 @@ public class AnswerScoring implements IAnswerScoring {
 
 	private StringSimilarity similarity;
 
-	public AnswerScoring() throws IOException, SQLException, InstantiationException, IllegalAccessException {
-		filterPipeline = new FilterPipeline();
+	public AnswerScoring(QuestionAnswering qa) throws IOException, SQLException, InstantiationException, IllegalAccessException {
+		filterPipeline = new FilterPipeline(qa);
 		similarity = StringSimilarity.getInstance();
 	}
 
@@ -236,7 +237,6 @@ public class AnswerScoring implements IAnswerScoring {
 					pas.setLcs(lcs);
 					// pas.setLs(ls);
 					pas.setOv(ov);
-
 					rankedScore.add(pas);
 				}
 
@@ -253,7 +253,7 @@ public class AnswerScoring implements IAnswerScoring {
 						lcsSum += pasi.getLcs()[i];
 						ovSum += pasi.getOv()[i];
 					}
-					System.out.println(i + 1 + " - " + esSum + " - " + lsSum + " - " + lcsSum + " - " + ovSum);
+//					System.out.println(i + 1 + " - " + esSum + " - " + lsSum + " - " + lcsSum + " - " + ovSum);
 					AnswerScoreCriterion asci = new AnswerScoreCriterion(i + 1, esSum, lsSum, lcsSum, ovSum);
 					answers.add(asci);
 				}
@@ -303,11 +303,11 @@ public class AnswerScoring implements IAnswerScoring {
 		return result;
 	}
 
-	public List<AnswerScoreCriterion> scoringEdit(String question, String A, String B, String C, String D)
+	public List<AnswerScoreCriterion> scoringEdit(String question, String A, String B, String C, String D, int numberOfPassages)
 			throws Exception {
 		List<AnswerScoreCriterion> answers = new ArrayList<AnswerScoreCriterion>();
 
-		List<Passage> passages = filterPipeline.filterPassagesHardCode(question, A, B, C, D);
+		List<Passage> passages = filterPipeline.filterPassagesHardCode(question, A, B, C, D, numberOfPassages);
 
 		if (passages != null) {
 			if (!passages.isEmpty()) {
